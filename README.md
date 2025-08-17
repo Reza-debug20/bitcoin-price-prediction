@@ -1,2 +1,7 @@
 # bitcoin-price-prediction
-A machine learning project to predict Bitcoin prices using Linear Regression and Random Forest.
+< This project is a machine learning model for Bitcoin price prediction, using Linear Regression and Random Forest.
+The project is built with Python and the libraries pandas, matplotlib, and scikit-learn >.
+
+
+
+
