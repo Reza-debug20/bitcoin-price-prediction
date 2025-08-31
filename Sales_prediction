@@ -1,0 +1,86 @@
+# 📊 پروژه: تحلیل و پیش‌بینی فروش
+
+# --- کتابخانه‌ها ---
+import os
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+# --- مسیر ذخیره فایل CSV ---
+DATA_FILE = "sales.csv"
+
+# --- اگر فایل CSV وجود نداشت، بساز ---
+if not os.path.exists(DATA_FILE):
+    data = {
+        "Date": pd.date_range(start="2023-01-01", periods=24, freq="M"),
+        "Product": ["A", "B", "C", "D"] * 6,
+        "AdBudget": np.random.randint(1000, 5000, size=24),
+        "Sales": np.random.randint(2000, 10000, size=24)
+    }
+    df = pd.DataFrame(data)
+    df.to_csv(DATA_FILE, index=False)
+    print("✅ فایل sales.csv ساخته شد.")
+else:
+    print("📂 فایل sales.csv پیدا شد.")
+
+# --- خواندن داده‌ها ---
+df = pd.read_csv(DATA_FILE, parse_dates=["Date"])
+print("\n📌 داده‌های اولیه:")
+print(df.head())
+
+# --- خلاصه آماری ---
+print("\n📌 خلاصه آماری:")
+print(df.describe())
+
+# --- بررسی فروش ماهانه ---
+df["Month"] = df["Date"].dt.to_period("M")
+monthly_sales = df.groupby("Month")["Sales"].sum()
+
+# نمودار فروش ماهانه
+plt.figure(figsize=(10,5))
+monthly_sales.plot(kind="line", marker="o")
+plt.title("ravande foroshe mahane")
+plt.xlabel("mah")
+plt.ylabel("mizane forosh")
+plt.grid(True)
+plt.show()
+
+# --- تصویرسازی فروش بر اساس محصول ---
+plt.figure(figsize=(8,5))
+sns.barplot(data=df, x="Product", y="Sales", ci=None)
+plt.title("📊 میانگین فروش هر محصول")
+plt.show()
+
+# --- آماده‌سازی داده برای مدل ---
+X = df[["AdBudget"]]  # ورودی: بودجه تبلیغات
+y = df["Sales"]       # خروجی: فروش
+
+# تقسیم داده‌ها به آموزش و تست
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# --- مدل رگرسیون خطی ---
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# پیش‌بینی
+y_pred = model.predict(X_test)
+
+# --- ارزیابی مدل ---
+print("\n📌 ارزیابی مدل:")
+print("MAE:", mean_absolute_error(y_test, y_pred))
+print("MSE:", mean_squared_error(y_test, y_pred))
+print("R²:", r2_score(y_test, y_pred))
+
+# --- مقایسه نتایج واقعی و پیش‌بینی ---
+plt.figure(figsize=(8,5))
+plt.scatter(X_test, y_test, label="واقعی")
+plt.scatter(X_test, y_pred, label="پیش‌بینی", marker="x", color="red")
+plt.title("📊 مقایسه فروش واقعی و پیش‌بینی‌شده")
+plt.xlabel("بودجه تبلیغات")
+plt.ylabel("فروش")
+plt.legend()
+plt.show()
